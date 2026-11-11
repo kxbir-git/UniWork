@@ -1,0 +1,13 @@
+{
+  "name": "uniwork",
+  "version": "2.0.0",
+  "description": "UniWork - University Freelancing Marketplace (MERN + React Native Expo)",
+  "scripts": {
+    "server": "cd backend && npm start",
+    "client": "cd frontend && npm run web",
+    "start": "cd backend && npm start"
+  },
+  "keywords": ["mern", "react-native", "expo", "freelancing", "escrow", "university"],
+  "author": "UniWork Team",
+  "license": "MIT"
+}
