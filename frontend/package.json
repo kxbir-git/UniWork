@@ -9,6 +9,7 @@
     "ios": "npx expo start --ios"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~4.0.1",
     "@expo/vector-icons": "^14.0.4",
     "axios": "^1.7.9",
     "expo": "~52.0.37",
