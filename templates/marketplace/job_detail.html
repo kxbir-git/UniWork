@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ job.title }} — UniWork{% endblock %}
+
+{% block content %}
+<!-- Page header -->
+<div class="uw-page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-2">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'marketplace:job_list' %}">Jobs</a></li>
+        <li class="breadcrumb-item active">{{ job.title|truncatechars:40 }}</li>
+      </ol>
+    </nav>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <span class="badge badge-primary">{{ job.category.name }}</span>
+      {% if job.status == 'open' %}
+        <span class="badge badge-success">Open for Proposals</span>
+      {% elif job.status == 'in_progress' %}
+        <span class="badge badge-warning">In Progress</span>
+      {% else %}
+        <span class="badge badge-neutral">Completed</span>
+      {% endif %}
+      <small class="text-muted ms-auto"><i class="bi bi-clock me-1"></i>Posted {{ job.created_at|date:"M d, Y" }}</small>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+
+    <!-- Main content -->
+    <div class="col-lg-8">
+      <div class="card p-4 p-md-5 mb-4">
+        <h2 class="fw-bold mb-4">{{ job.title }}</h2>
+
+        <!-- Budget highlight strip -->
+        <div class="d-flex flex-wrap gap-4 p-3 mb-4" style="background: var(--clr-bg-subtle); border: 1px solid var(--clr-border); border-radius: var(--radius-md);">
+          <div>
+            <div class="form-label mb-1">Budget</div>
+            <div class="fw-bold text-success" style="font-family: var(--font-display); font-size: 1.3rem;">{{ job.budget_display }}</div>
+            <small class="text-muted">{{ job.get_budget_type_display }}</small>
+          </div>
+          <div>
+            <div class="form-label mb-1">Experience</div>
+            <div class="fw-semibold">{{ job.get_experience_level_display }}</div>
+          </div>
+          <div>
+            <div class="form-label mb-1">Proposals</div>
+            <div class="fw-semibold">{{ job.proposals_count }} bids</div>
+          </div>
+        </div>
+
+        <h5 class="fw-bold mb-3">Project Description</h5>
+        <div class="text-muted mb-4" style="white-space: pre-line; line-height: 1.75; font-size: 0.9375rem;">{{ job.description }}</div>
+
+        <h5 class="fw-bold mb-3">Required Skills &amp; Expertise</h5>
+        <div class="mb-4">
+          {% for skill in job.skills_required.all %}
+          <span class="skill-chip">{{ skill.name }}</span>
+          {% empty %}
+          <span class="text-muted small">No specific tags specified.</span>
+          {% endfor %}
+        </div>
+
+        <hr style="border-color: var(--clr-border);">
+
+        <!-- Action box -->
+        <div class="mt-4">
+          {% if is_owner %}
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'marketplace:job_proposals' job.id %}" class="btn btn-primary rounded-pill px-5 fw-semibold">
+              <i class="bi bi-people-fill me-1"></i>Review Proposals ({{ job.proposals_count }})
+            </a>
+            <a href="{% url 'marketplace:job_update' job.id %}" class="btn btn-outline-secondary rounded-pill px-4">
+              <i class="bi bi-pencil-square me-1"></i>Edit Job
+            </a>
+          </div>
+          {% elif has_applied %}
+          <div class="uw-notice uw-notice-info">
+            <i class="bi bi-check-circle-fill fs-4 flex-shrink-0"></i>
+            <div>
+              <div class="fw-bold mb-1">Proposal Submitted</div>
+              <p class="mb-0 small">
+                You bid <strong>${{ user_proposal.bid_amount }}</strong> on {{ user_proposal.created_at|date:"M d, Y" }}.
+                Status: <span class="badge badge-primary">{{ user_proposal.get_status_display }}</span>
+              </p>
+            </div>
+          </div>
+          {% elif can_apply %}
+          {% if request.user.is_authenticated and request.user.is_freelancer %}
+          <a href="{% url 'marketplace:proposal_submit' job.id %}" class="btn btn-success btn-lg rounded-pill px-5 fw-semibold">
+            <i class="bi bi-send-fill me-1"></i>Submit a Proposal
+          </a>
+          {% elif not request.user.is_authenticated %}
+          <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg rounded-pill px-5 fw-semibold">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Log In to Submit Proposal
+          </a>
+          {% endif %}
+          {% else %}
+          <div class="uw-notice uw-notice-warning">
+            <i class="bi bi-info-circle flex-shrink-0"></i>
+            <span>This job is no longer accepting new proposals.</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Client card -->
+      <div class="card p-4 mb-4">
+        <h6 class="fw-bold mb-3" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--clr-txt-muted);">About the Client</h6>
+        <div class="d-flex align-items-center gap-3 mb-3">
+          {% if job.client.profile_image %}
+          <img src="{{ job.client.profile_image.url }}" alt="{{ job.client.display_name }}" class="uw-profile-avatar" style="width: 52px; height: 52px;">
+          {% else %}
+          <div class="uw-profile-avatar-placeholder" style="width: 52px; height: 52px; font-size: 1.3rem;">
+            <i class="bi bi-building"></i>
+          </div>
+          {% endif %}
+          <div>
+            <div class="fw-bold">{{ job.client.client_profile.company_name|default:job.client.display_name }}</div>
+            <small class="text-muted">{{ job.client.location|default:"University Partner" }}</small>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between small mb-2 pb-2" style="border-bottom: 1px solid var(--clr-border);">
+          <span class="text-muted">Total Spent</span>
+          <strong>${{ job.client.client_profile.total_spent|floatformat:2 }}</strong>
+        </div>
+        <div class="d-flex justify-content-between small mb-3">
+          <span class="text-muted">Member Since</span>
+          <span class="fw-semibold">{{ job.client.created_at|date:"M Y" }}</span>
+        </div>
+        <a href="{% url 'accounts:client_detail' job.client.id %}" class="btn btn-outline-primary btn-sm rounded-pill w-100">
+          View Client Profile
+        </a>
+      </div>
+
+      <!-- Similar jobs -->
+      {% if other_jobs %}
+      <div class="card p-4">
+        <h6 class="fw-bold mb-3" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--clr-txt-muted);">Similar Opportunities</h6>
+        {% for ojob in other_jobs %}
+        <div class="mb-3 pb-3" style="border-bottom: 1px solid var(--clr-border);">
+          <a href="{% url 'marketplace:job_detail' ojob.id %}" class="fw-semibold text-dark text-decoration-none small d-block text-truncate">
+            {{ ojob.title }}
+          </a>
+          <div class="d-flex justify-content-between small text-muted mt-1">
+            <span>{{ ojob.budget_display }}</span>
+            <span>{{ ojob.proposals_count }} bids</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

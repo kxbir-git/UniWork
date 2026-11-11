@@ -1,0 +1,44 @@
+<footer class="uw-footer">
+  <div class="container">
+    <div class="row gy-5">
+      <!-- Brand column -->
+      <div class="col-md-5">
+        <a href="/" class="uw-brand text-decoration-none mb-3 d-inline-flex">
+          UniWork<span class="dot"></span>
+        </a>
+        <p class="text-muted small" style="max-width: 320px; line-height: 1.7;">
+          A university freelancing marketplace empowering students and alumni to collaborate on real-world projects through a simulated milestone-escrow ledger.
+        </p>
+        <span class="badge badge-primary mt-2">Final Year Project Edition</span>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-6 col-md-2 offset-md-1">
+        <h6 class="fw-700 mb-3" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--clr-txt-muted);">Platform</h6>
+        <ul class="list-unstyled mb-0" style="font-size: 0.875rem;">
+          <li class="mb-2"><a href="{% url 'marketplace:job_list' %}" class="text-muted text-decoration-none">Browse Jobs</a></li>
+          <li class="mb-2"><a href="{% url 'core:how_it_works' %}" class="text-muted text-decoration-none">How It Works</a></li>
+          <li class="mb-2"><a href="{% url 'core:about' %}" class="text-muted text-decoration-none">About Project</a></li>
+          <li class="mb-2"><a href="{% url 'accounts:register' %}" class="text-muted text-decoration-none">Join as Freelancer</a></li>
+        </ul>
+      </div>
+
+      <!-- Tech stack -->
+      <div class="col-6 col-md-3">
+        <h6 class="fw-700 mb-3" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--clr-txt-muted);">Built With</h6>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="skill-chip"><i class="bi bi-code-square me-1"></i>Python 3.13</span>
+          <span class="skill-chip"><i class="bi bi-layers me-1"></i>Django 5.x</span>
+          <span class="skill-chip"><i class="bi bi-bootstrap me-1"></i>Bootstrap 5</span>
+          <span class="skill-chip"><i class="bi bi-database me-1"></i>SQLite</span>
+          <span class="skill-chip"><i class="bi bi-shield-check me-1"></i>Escrow Ledger</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="uw-footer-bottom">
+      <span>&copy; {% now "Y" %} UniWork. Academic Freelancing Marketplace.</span>
+      <span>Designed for Final Year University Evaluation</span>
+    </div>
+  </div>
+</footer>

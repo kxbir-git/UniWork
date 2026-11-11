@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}My Contracts — UniWork{% endblock %}
+
+{% block content %}
+<div class="uw-page-header">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-briefcase me-2" style="color: var(--clr-primary);"></i>Contracts &amp; Engagements</h2>
+        <p class="text-muted small mb-0">Active and past freelance contracts with milestone escrow tracking</p>
+      </div>
+      <div class="btn-group" role="group">
+        <a href="{% url 'contracts:contract_list' %}" class="btn btn-outline-secondary btn-sm {% if not selected_status %}active{% endif %}">All</a>
+        <a href="{% url 'contracts:contract_list' %}?status=active" class="btn btn-outline-secondary btn-sm {% if selected_status == 'active' %}active{% endif %}">Active</a>
+        <a href="{% url 'contracts:contract_list' %}?status=completed" class="btn btn-outline-secondary btn-sm {% if selected_status == 'completed' %}active{% endif %}">Completed</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+    {% for contract in contracts %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 card-hover p-4 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          {% if contract.status == 'active' %}
+          <span class="badge badge-warning"><i class="bi bi-lightning-charge-fill me-1"></i>Active</span>
+          {% else %}
+          <span class="badge badge-success"><i class="bi bi-check-circle-fill me-1"></i>Completed</span>
+          {% endif %}
+          <span class="fw-bold text-success" style="font-family: var(--font-display); font-size: 1.1rem;">${{ contract.total_amount|floatformat:2 }}</span>
+        </div>
+
+        <h5 class="fw-bold mb-2">
+          <a href="{% url 'contracts:contract_room' contract.id %}" class="text-dark text-decoration-none">{{ contract.job.title }}</a>
+        </h5>
+
+        <div class="text-muted small mb-3">
+          {% if request.user == contract.client %}
+          <div><i class="bi bi-person-badge me-1"></i>Freelancer: <strong>{{ contract.freelancer.display_name }}</strong></div>
+          {% else %}
+          <div><i class="bi bi-building me-1"></i>Client: <strong>{{ contract.client.client_profile.company_name|default:contract.client.display_name }}</strong></div>
+          {% endif %}
+          <div class="mt-1"><i class="bi bi-calendar-event me-1"></i>Started {{ contract.created_at|date:"M d, Y" }}</div>
+        </div>
+
+        <!-- Progress -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>Milestone Progress</span>
+            <span>{{ contract.progress_percentage }}%</span>
+          </div>
+          <div class="progress">
+            <div class="progress-bar bg-success" style="width: {{ contract.progress_percentage }};"></div>
+          </div>
+        </div>
+
+        <div class="mt-auto">
+          <a href="{% url 'contracts:contract_room' contract.id %}" class="btn btn-primary rounded-pill w-100 fw-semibold">
+            Enter Contract Room &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="card p-5 text-center">
+        <i class="bi bi-folder-x" style="font-size: 2.5rem; color: var(--clr-txt-light);"></i>
+        <h4 class="fw-bold mt-3 mb-1">No Contracts Found</h4>
+        <p class="text-muted small mb-3">You don't have any contracts under this filter.</p>
+        {% if request.user.is_client %}
+        <div><a href="{% url 'marketplace:job_create' %}" class="btn btn-primary rounded-pill btn-sm px-4">Post a Job</a></div>
+        {% else %}
+        <div><a href="{% url 'marketplace:job_list' %}" class="btn btn-primary rounded-pill btn-sm px-4">Browse Open Jobs</a></div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

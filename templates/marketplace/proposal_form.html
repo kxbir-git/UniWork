@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Proposal - {{ job.title }} - UniWork{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Job Summary Card -->
+            <div class="card p-4 mb-4 bg-light">
+                <span class="badge bg-primary-subtle text-primary align-self-start px-3 py-1 rounded-pill mb-2">Bidding on</span>
+                <h4 class="fw-bold mb-1">{{ job.title }}</h4>
+                <div class="d-flex justify-content-between text-muted small mt-2">
+                    <span>Category: <strong>{{ job.category.name }}</strong></span>
+                    <span>Client Budget: <strong class="text-success">{{ job.budget_display }}</strong></span>
+                </div>
+            </div>
+
+            <!-- Proposal Form -->
+            <div class="card p-4 p-md-5">
+                <h3 class="fw-bold mb-1">Your Proposal Terms</h3>
+                <p class="text-muted small mb-4">Set your bid price, delivery timeframe, and pitch your qualifications.</p>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger small py-2 mb-3">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Bid Amount ($USD)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.bid_amount }}
+                            </div>
+                            <small class="text-muted">Total amount client will deposit in escrow upon contract start</small>
+                            {% if form.bid_amount.errors %}
+                                <div class="text-danger small mt-1">{{ form.bid_amount.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Estimated Delivery Time (Days)</label>
+                            {{ form.estimated_days }}
+                            <small class="text-muted">Expected days to deliver all milestones</small>
+                            {% if form.estimated_days.errors %}
+                                <div class="text-danger small mt-1">{{ form.estimated_days.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold">Cover Letter & Pitch</label>
+                        {{ form.cover_letter }}
+                        <small class="text-muted d-block mt-1">Explain how you plan to complete this project, reference your past coursework/code, and ask any clarifying questions.</small>
+                        {% if form.cover_letter.errors %}
+                            <div class="text-danger small mt-1">{{ form.cover_letter.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'marketplace:job_detail' job.id %}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+                        <button type="submit" class="btn btn-success rounded-pill px-5 fw-semibold shadow-sm">
+                            <i class="bi bi-send-fill me-1"></i> Send Proposal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

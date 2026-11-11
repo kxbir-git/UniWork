@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+
+{% block title %}Contract Room — {{ contract.job.title }} — UniWork{% endblock %}
+
+{% block content %}
+<!-- Contract header -->
+<div class="uw-workroom-header">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-1">
+            <li class="breadcrumb-item"><a href="{% url 'contracts:contract_list' %}">Contracts</a></li>
+            <li class="breadcrumb-item active">Contract #{{ contract.id }}</li>
+          </ol>
+        </nav>
+        <h2 class="fw-bold mb-1">{{ contract.job.title }}</h2>
+        <div class="d-flex flex-wrap gap-3 text-muted small">
+          <span><i class="bi bi-building me-1"></i>Client: <strong class="text-dark">{{ contract.client.client_profile.company_name|default:contract.client.display_name }}</strong></span>
+          <span><i class="bi bi-person-badge me-1"></i>Freelancer: <strong class="text-dark">{{ contract.freelancer.display_name }}</strong></span>
+          <span><i class="bi bi-calendar me-1"></i>Started {{ contract.created_at|date:"M d, Y" }}</span>
+        </div>
+      </div>
+      <div class="text-end">
+        {% if contract.status == 'active' %}
+        <span class="badge badge-warning px-3 py-2 fs-6"><i class="bi bi-lightning-charge-fill me-1"></i>Active</span>
+        {% else %}
+        <span class="badge badge-success px-3 py-2 fs-6"><i class="bi bi-check-circle-fill me-1"></i>Completed</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Financial summary strip -->
+<div style="background: var(--clr-bg-subtle); border-bottom: 1px solid var(--clr-border); padding: 14px 0;">
+  <div class="container">
+    <div class="d-flex flex-wrap gap-4 align-items-center">
+      <div>
+        <span class="form-label mb-0">Contract Value</span>
+        <div class="fw-bold" style="font-family: var(--font-display); font-size: 1.1rem;">${{ contract.total_amount|floatformat:2 }}</div>
+      </div>
+      <div>
+        <span class="form-label mb-0">Escrow Released</span>
+        <div class="fw-bold text-success" style="font-family: var(--font-display); font-size: 1.1rem;">${{ contract.amount_paid|floatformat:2 }}</div>
+      </div>
+      <div class="flex-grow-1" style="min-width: 200px; max-width: 300px;">
+        <div class="d-flex justify-content-between small text-muted mb-1">
+          <span>Milestone Progress</span>
+          <span>{{ contract.progress_percentage }}%</span>
+        </div>
+        <div class="progress">
+          <div class="progress-bar bg-success" style="width: {{ contract.progress_percentage }}%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+
+    <!-- Milestones column -->
+    <div class="col-lg-7">
+      <div class="card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="fw-bold mb-0"><i class="bi bi-list-check me-2" style="color: var(--clr-primary);"></i>Milestones &amp; Deliverables</h4>
+          {% if contract.status == 'active' %}
+          <button type="button" class="btn btn-outline-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#addMilestoneModal">
+            <i class="bi bi-plus-lg me-1"></i>Add Milestone
+          </button>
+          {% endif %}
+        </div>
+
+        <div class="accordion" id="milestonesAccordion">
+          {% for milestone in milestones %}
+          <div class="accordion-item mb-3">
+            <h2 class="accordion-header">
+              <button class="accordion-button {% if not forloop.first %}collapsed{% endif %} py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ milestone.id }}">
+                <div class="d-flex justify-content-between align-items-center w-100 me-3 flex-wrap gap-2">
+                  <div>
+                    <span class="fw-bold text-dark">{{ milestone.title }}</span>
+                    {% if milestone.due_date %}
+                    <small class="text-muted d-block">Due: {{ milestone.due_date|date:"M d, Y" }}</small>
+                    {% endif %}
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold text-success">${{ milestone.amount|floatformat:2 }}</span>
+                    {% if milestone.is_approved %}
+                    <span class="badge badge-success">Approved &amp; Paid</span>
+                    {% elif milestone.status == 'submitted' %}
+                    <span class="badge badge-sky">Work Submitted</span>
+                    {% elif milestone.status == 'in_progress' %}
+                    <span class="badge badge-warning">In Progress</span>
+                    {% else %}
+                    <span class="badge badge-neutral">Pending</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </button>
+            </h2>
+            <div id="collapse{{ milestone.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#milestonesAccordion">
+              <div class="accordion-body" style="background: var(--clr-bg-subtle);">
+                {% if milestone.description %}
+                <p class="text-muted small mb-3">{{ milestone.description }}</p>
+                {% endif %}
+
+                <h6 class="form-label mb-2">Deliverables &amp; Submissions</h6>
+                {% for sub in milestone.submissions.all %}
+                <div class="card p-3 mb-2 bg-white">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <small class="fw-bold"><i class="bi bi-person-circle me-1"></i>{{ sub.freelancer.display_name }}</small>
+                    <small class="text-muted">{{ sub.submitted_at|date:"M d, Y H:i" }}</small>
+                  </div>
+                  <p class="small text-muted mb-2" style="white-space: pre-line;">{{ sub.work_notes }}</p>
+                  {% if sub.attachment %}
+                  <a href="{{ sub.attachment.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
+                    <i class="bi bi-paperclip me-1"></i>Download Deliverable
+                  </a>
+                  {% endif %}
+                </div>
+                {% empty %}
+                <p class="small text-muted fst-italic mb-3">No deliverables submitted yet.</p>
+                {% endfor %}
+
+                <!-- Role actions -->
+                <div class="mt-3 pt-2 d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-top: 1px solid var(--clr-border);">
+                  {% if is_client and not milestone.is_approved %}
+                  <form method="post" action="{% url 'contracts:milestone_approve' milestone.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm rounded-pill fw-semibold"
+                            onclick="return confirm('Approve milestone and release ${{ milestone.amount }} from escrow?');">
+                      <i class="bi bi-check-circle-fill me-1"></i>Approve &amp; Release ${{ milestone.amount }}
+                    </button>
+                  </form>
+                  {% elif is_freelancer and not milestone.is_approved %}
+                  <button class="btn btn-primary btn-sm rounded-pill fw-semibold" type="button"
+                          data-bs-toggle="collapse" data-bs-target="#submitForm{{ milestone.id }}">
+                    <i class="bi bi-upload me-1"></i>Submit Work for Review
+                  </button>
+                  {% elif milestone.is_approved %}
+                  <span class="text-success small fw-semibold">
+                    <i class="bi bi-shield-check me-1"></i>Funds released to freelancer's wallet.
+                  </span>
+                  {% endif %}
+                </div>
+
+                <!-- Freelancer submission form -->
+                {% if is_freelancer and not milestone.is_approved %}
+                <div class="collapse mt-3" id="submitForm{{ milestone.id }}">
+                  <div class="card card-body bg-white">
+                    <h6 class="fw-bold mb-3">Submit Deliverable for: {{ milestone.title }}</h6>
+                    <form method="post" action="{% url 'contracts:work_submission' milestone.id %}" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      <div class="mb-2">
+                        <label class="form-label">Submission Notes</label>
+                        {{ submission_form.work_notes }}
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Attachment (ZIP, PDF, Code)</label>
+                        {{ submission_form.attachment }}
+                      </div>
+                      <button type="submit" class="btn btn-success btn-sm rounded-pill px-4 fw-semibold">
+                        Confirm Submission
+                      </button>
+                    </form>
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-muted small">No milestones established yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat column -->
+    <div class="col-lg-5">
+      <div class="card p-4 h-100 d-flex flex-column" style="min-height: 500px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-chat-dots-fill me-2" style="color: var(--clr-primary);"></i>Workroom Chat</h5>
+          <span class="badge badge-neutral">Direct</span>
+        </div>
+
+        <div class="chat-box flex-grow-1 mb-3" id="chatMessagesBox">
+          {% for msg in contract_messages %}
+          {% if "[SYSTEM NOTIFICATION]" in msg.content or "[ESCROW RELEASED]" in msg.content %}
+          <div class="chat-bubble chat-bubble-system">
+            <small class="fw-bold d-block mb-1">{{ msg.timestamp|date:"M d, H:i" }}</small>
+            {{ msg.content }}
+          </div>
+          {% elif msg.sender == request.user %}
+          <div class="chat-bubble chat-bubble-me">
+            <div>{{ msg.content }}</div>
+            <small class="d-block text-end mt-1" style="opacity:0.65; font-size: 0.72rem;">{{ msg.timestamp|date:"M d, H:i" }}</small>
+          </div>
+          {% else %}
+          <div class="chat-bubble chat-bubble-other">
+            <small class="fw-bold d-block mb-1" style="color: var(--clr-primary);">{{ msg.sender.display_name }}</small>
+            <div>{{ msg.content }}</div>
+            <small class="text-muted d-block text-end mt-1" style="font-size: 0.72rem;">{{ msg.timestamp|date:"M d, H:i" }}</small>
+          </div>
+          {% endif %}
+          {% empty %}
+          <div class="text-center text-muted py-5">
+            <i class="bi bi-chat-square-text" style="font-size: 2rem;"></i>
+            <p class="small mt-2">No messages yet. Start the conversation!</p>
+          </div>
+          {% endfor %}
+        </div>
+
+        <form id="contractChatForm" method="post" action="{% url 'messaging:send_message' contract.id %}">
+          {% csrf_token %}
+          <div class="uw-chat-input">
+            <input type="text" name="content" id="chatContentInput" placeholder="Type a message or update…" required autocomplete="off">
+            <button type="submit" class="btn btn-primary px-3" style="border-radius: var(--radius-pill);">
+              <i class="bi bi-send-fill"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Milestone Modal -->
+<div class="modal fade" id="addMilestoneModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'contracts:milestone_create' contract.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Add Project Milestone</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Milestone Title</label>
+            {{ milestone_form.title }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description &amp; Acceptance Criteria</label>
+            {{ milestone_form.description }}
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="form-label">Amount (USD)</label>
+              {{ milestone_form.amount }}
+            </div>
+            <div class="col-6">
+              <label class="form-label">Due Date</label>
+              {{ milestone_form.due_date }}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold">Add Milestone</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

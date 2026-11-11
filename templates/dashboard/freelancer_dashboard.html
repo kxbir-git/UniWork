@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Freelancer Dashboard — UniWork{% endblock %}
+
+{% block content %}
+<div class="uw-page-header">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <span class="badge badge-success mb-2">Freelancer Console</span>
+        <h2 class="fw-bold mb-0">Welcome back, {{ request.user.first_name }}!</h2>
+        <p class="text-muted small mb-0">{{ freelancer_profile.title|default:"Track your active bids, deliverables, and wallet earnings" }}</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{% url 'marketplace:job_list' %}" class="btn btn-primary rounded-pill px-4 fw-semibold">
+          <i class="bi bi-search me-1"></i>Browse Projects
+        </a>
+        <a href="{% url 'accounts:wallet' %}" class="btn btn-outline-secondary rounded-pill px-3">
+          <i class="bi bi-wallet2 me-1"></i>Wallet
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <!-- Stat tiles -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="uw-stat-tile">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="tile-label">Available Wallet</div>
+            <div class="tile-value" style="color: var(--clr-green);">${{ wallet.balance|floatformat:2 }}</div>
+          </div>
+          <div class="tile-icon" style="background: var(--clr-green-subtle); color: var(--clr-green);">
+            <i class="bi bi-wallet2"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="uw-stat-tile">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="tile-label">Active Contracts</div>
+            <div class="tile-value" style="color: var(--clr-primary);">{{ active_contracts.count }}</div>
+          </div>
+          <div class="tile-icon" style="background: var(--clr-primary-subtle); color: var(--clr-primary);">
+            <i class="bi bi-briefcase"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="uw-stat-tile">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="tile-label">Pending Bids</div>
+            <div class="tile-value" style="color: var(--clr-amber);">{{ active_proposals_count }}</div>
+          </div>
+          <div class="tile-icon" style="background: var(--clr-amber-subtle); color: var(--clr-amber);">
+            <i class="bi bi-send"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="uw-stat-tile">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="tile-label">Total Earned</div>
+            <div class="tile-value" style="color: var(--clr-sky);">${{ freelancer_profile.total_earned|default:"0"|floatformat:0 }}</div>
+          </div>
+          <div class="tile-icon" style="background: var(--clr-sky-subtle); color: var(--clr-sky);">
+            <i class="bi bi-trophy"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main column -->
+    <div class="col-lg-8">
+      <!-- Active contracts -->
+      <div class="card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-lightning-charge me-2 text-primary"></i>Active Workrooms</h5>
+          <a href="{% url 'contracts:contract_list' %}" class="small text-primary text-decoration-none">View All</a>
+        </div>
+        {% for contract in active_contracts %}
+        <div class="mb-3 p-3 rounded-3" style="background: var(--clr-bg-subtle); border: 1px solid var(--clr-border);">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <h6 class="fw-bold mb-1">
+                <a href="{% url 'contracts:contract_room' contract.id %}" class="text-dark text-decoration-none">{{ contract.job.title }}</a>
+              </h6>
+              <small class="text-muted">Client: <strong>{{ contract.client.client_profile.company_name|default:contract.client.display_name }}</strong> &bull; ${{ contract.total_amount }}</small>
+            </div>
+            <a href="{% url 'contracts:contract_room' contract.id %}" class="btn btn-primary btn-sm rounded-pill px-3">
+              Enter &rarr;
+            </a>
+          </div>
+          <div class="progress mt-2">
+            <div class="progress-bar bg-success" style="width: {{ contract.progress_percentage }}%;"></div>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted small mb-0">No active contracts. Start by bidding on open jobs!</p>
+        {% endfor %}
+      </div>
+
+      <!-- Proposals tracker -->
+      <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-send-check me-2 text-muted"></i>Recent Bids &amp; Proposals</h5>
+          <a href="{% url 'marketplace:job_list' %}" class="btn btn-outline-primary btn-sm rounded-pill">Find More Work</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Job Title</th>
+                <th>Bid</th>
+                <th>Submitted</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for proposal in proposals %}
+              <tr>
+                <td>
+                  <a href="{% url 'marketplace:job_detail' proposal.job.id %}" class="fw-bold text-dark text-decoration-none d-block">{{ proposal.job.title }}</a>
+                  <small class="text-muted">{{ proposal.job.client.client_profile.company_name|default:proposal.job.client.display_name }}</small>
+                </td>
+                <td class="fw-bold text-success">${{ proposal.bid_amount|floatformat:2 }}</td>
+                <td class="text-muted small">{{ proposal.created_at|date:"M d, Y" }}</td>
+                <td>
+                  {% if proposal.status == 'accepted' %}<span class="badge badge-success">Hired</span>
+                  {% elif proposal.status == 'shortlisted' %}<span class="badge badge-warning">Shortlisted</span>
+                  {% elif proposal.status == 'rejected' %}<span class="badge badge-neutral">Rejected</span>
+                  {% else %}<span class="badge badge-neutral">Pending</span>{% endif %}
+                </td>
+                <td class="text-end">
+                  {% if proposal.status == 'accepted' and proposal.job.contract %}
+                  <a href="{% url 'contracts:contract_room' proposal.job.contract.id %}" class="btn btn-success btn-sm rounded-pill">Workroom</a>
+                  {% else %}
+                  <a href="{% url 'marketplace:job_detail' proposal.job.id %}" class="btn btn-outline-secondary btn-sm rounded-pill">View Job</a>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">No proposals yet. Browse jobs to place bids!</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Profile snapshot -->
+      <div class="card p-4 mb-4 text-center">
+        {% if request.user.profile_image %}
+        <img src="{{ request.user.profile_image.url }}" alt="{{ request.user.display_name }}" class="uw-profile-avatar mx-auto mb-3" style="width: 72px; height: 72px;">
+        {% else %}
+        <div class="uw-profile-avatar-placeholder mx-auto mb-3" style="width: 72px; height: 72px; font-size: 1.75rem;">
+          {{ request.user.first_name|first|default:"U" }}
+        </div>
+        {% endif %}
+        <h5 class="fw-bold mb-1">{{ request.user.display_name }}</h5>
+        <p class="text-muted small mb-3">{{ freelancer_profile.title|default:"University Student" }}</p>
+        <div class="d-flex justify-content-around text-center mb-3 pb-3" style="border-bottom: 1px solid var(--clr-border);">
+          <div>
+            <span class="fw-bold d-block">${{ freelancer_profile.hourly_rate|default:"25" }}</span>
+            <small class="text-muted">Rate/hr</small>
+          </div>
+          <div>
+            <span class="fw-bold d-block">{{ freelancer_profile.connects|default:"20" }}</span>
+            <small class="text-muted">Connects</small>
+          </div>
+          <div>
+            <span class="fw-bold d-block">{{ freelancer_profile.completed_jobs_count|default:"0" }}</span>
+            <small class="text-muted">Jobs Done</small>
+          </div>
+        </div>
+        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-secondary btn-sm rounded-pill w-100">
+          <i class="bi bi-pencil-square me-1"></i>Edit Profile
+        </a>
+      </div>
+
+      <!-- Recent wallet activity -->
+      <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-cash-stack me-1 text-success"></i>Wallet Activity</h6>
+          <a href="{% url 'accounts:wallet' %}" class="small text-decoration-none">Ledger</a>
+        </div>
+        {% for tx in recent_transactions %}
+        <div class="pb-2 mb-2 small" style="border-bottom: 1px solid var(--clr-border);">
+          <div class="d-flex justify-content-between">
+            <span class="fw-semibold">{{ tx.get_transaction_type_display }}</span>
+            <strong class="{% if tx.amount > 0 %}text-success{% else %}text-danger{% endif %}">
+              {% if tx.amount > 0 %}+{% endif %}${{ tx.amount|floatformat:2 }}
+            </strong>
+          </div>
+          <span class="text-muted d-block text-truncate">{{ tx.description }}</span>
+        </div>
+        {% empty %}
+        <p class="text-muted small mb-0">No wallet activity yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

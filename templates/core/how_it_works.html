@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}How It Works - UniWork{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="text-center mb-5">
+        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill mb-2">Platform Mechanics</span>
+        <h1 class="fw-bold">How UniWork Operates</h1>
+        <p class="lead text-muted">A clear, transparent lifecycle for both Clients and Freelancers</p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- Client Journey -->
+        <div class="col-lg-6">
+            <div class="card h-100 p-4 border-primary">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="bg-primary text-white rounded-circle p-2 me-3 fs-5">
+                        <i class="bi bi-person-workspace"></i>
+                    </span>
+                    <h3 class="fw-bold mb-0 text-primary">For Clients</h3>
+                </div>
+                <ol class="list-group list-group-numbered list-group-flush mb-4">
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Post a Detailed Job</div>
+                            Specify deliverables, required university skills, deadline, and fixed or hourly budget.
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Review Proposals & Shortlist</div>
+                            Inspect candidate profiles, GitHub/portfolio links, hourly rates, and personalized pitches.
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Accept Proposal & Escrow Locking</div>
+                            Accepting automatically activates the Contract room and locks milestone funds in simulated escrow.
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Review Deliverables & Approve</div>
+                            Inspect work attachments, discuss iterations via threaded chat, and click "Approve" to release funds.
+                        </div>
+                    </li>
+                </ol>
+                <div class="mt-auto text-center">
+                    <a href="{% url 'marketplace:job_create' %}" class="btn btn-primary rounded-pill w-100 fw-semibold">
+                        Post a Job Now
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Freelancer Journey -->
+        <div class="col-lg-6">
+            <div class="card h-100 p-4 border-success">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="bg-success text-white rounded-circle p-2 me-3 fs-5">
+                        <i class="bi bi-mortarboard"></i>
+                    </span>
+                    <h3 class="fw-bold mb-0 text-success">For Student Freelancers</h3>
+                </div>
+                <ol class="list-group list-group-numbered list-group-flush mb-4">
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Create Profile & Highlight Skills</div>
+                            List relevant degree coursework, project repositories, portfolio link, and desired hourly rate.
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Browse & Submit Targeted Proposals</div>
+                            Search projects matching your domain and submit bids with estimated delivery timeframes.
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Collaborate in the Contract Room</div>
+                            Chat with client, align on milestone dates, and track deliverable status with real-time feedback.
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Submit Work & Receive Earnings</div>
+                            Upload work notes and code attachments. On client approval, funds are immediately added to your wallet.
+                        </div>
+                    </li>
+                </ol>
+                <div class="mt-auto text-center">
+                    <a href="{% url 'marketplace:job_list' %}" class="btn btn-success rounded-pill w-100 fw-semibold">
+                        Explore Open Jobs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

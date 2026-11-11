@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}About UniWork - University Project{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card p-4 p-md-5">
+                <span class="badge bg-primary-subtle text-primary align-self-start px-3 py-2 rounded-pill mb-3">Academic Context & Design</span>
+                <h1 class="fw-bold mb-3">About UniWork</h1>
+                <p class="lead text-muted">
+                    UniWork is a complete, full-stack freelancing web platform developed as an undergraduate final year university computer science project.
+                </p>
+                <hr class="my-4">
+
+                <h4 class="fw-bold"><i class="bi bi-bullseye text-primary me-2"></i> Problem Statement & Motivation</h4>
+                <p class="text-secondary">
+                    Undergraduate and postgraduate students often possess strong software engineering, AI/ML, design, and academic research skills, yet traditional freelancing platforms (e.g. Upwork, Fiverr) present high barriers to entry, steep platform commissions, and impersonal bidding environments. UniWork solves this by establishing a dedicated campus-oriented marketplace with transparent simulated escrow tracking.
+                </p>
+
+                <h4 class="fw-bold mt-4"><i class="bi bi-cpu text-primary me-2"></i> Architecture & Engineering Highlights</h4>
+                <ul class="text-secondary">
+                    <li><strong>Custom Authentication System:</strong> Extended <code>AbstractUser</code> with email-based authentication and role enforcement (<code>is_client</code>, <code>is_freelancer</code>).</li>
+                    <li><strong>Simulated Escrow Ledger:</strong> <code>Wallet</code> and <code>Transaction</code> models providing double-entry accounting mechanics for milestone locking, release, and auditability.</li>
+                    <li><strong>Role-Based Permission Mixins:</strong> Strict access control separating client privileges (job creation, proposal acceptance, milestone release) from freelancer privileges (bidding, deliverable uploads).</li>
+                    <li><strong>Contract Workroom:</strong> Synchronized milestone timeline, attachment upload handling, and embedded direct messaging.</li>
+                </ul>
+
+                <h4 class="fw-bold mt-4"><i class="bi bi-laptop text-primary me-2"></i> Examiner & Grading Quickstart</h4>
+                <p class="text-secondary mb-3">
+                    For demonstration purposes, pre-configured demo user accounts are seeded into the system:
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped small">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Role</th>
+                                <th>Email</th>
+                                <th>Password</th>
+                                <th>Testing Scope</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-danger">Admin</span></td>
+                                <td><code>admin@uniwork.local</code></td>
+                                <td><code>AdminPass123!</code></td>
+                                <td>Django Admin inspection & site management</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-primary">Client</span></td>
+                                <td><code>client.sarah@uniwork.local</code></td>
+                                <td><code>Password123!</code></td>
+                                <td>Post jobs, review proposals, release escrow</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-success">Freelancer</span></td>
+                                <td><code>freelancer.alex@uniwork.local</code></td>
+                                <td><code>Password123!</code></td>
+                                <td>Submit bids, upload deliverables, view wallet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <a href="{% url 'marketplace:job_list' %}" class="btn btn-primary px-4 rounded-pill me-2">Browse Jobs</a>
+                    <a href="{% url 'core:how_it_works' %}" class="btn btn-outline-secondary px-4 rounded-pill">How It Works</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
